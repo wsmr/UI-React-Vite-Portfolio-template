@@ -31,6 +31,13 @@ A pixel-perfect replica of the Portfolio.site personal website, built with moder
 - **PostCSS**: CSS processing
 - **Autoprefixer**: CSS vendor prefixes
 
+
+## Demo
+Here's a quick look at the web application:
+
+![Demo](site.png)
+
+
 ## 📦 Installation
 
 ### Prerequisites
