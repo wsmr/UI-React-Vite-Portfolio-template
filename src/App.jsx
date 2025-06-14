@@ -3,12 +3,55 @@ import { Button } from '@/components/ui/button.jsx'
 import { Moon, Sun } from 'lucide-react'
 import './App.css'
 
+// Import assets
+import birdGif from './assets/bird.gif'
+import cloudSvg from './assets/cloud.svg'
+import cloudDarkSvg from './assets/cloud-dark.svg'
+import cloudAltSvg from './assets/cloud-alt.svg'
+import cloudAltDarkSvg from './assets/cloud-alt-dark.svg'
+import snowflakeSvg from './assets/snowflake.svg'
+
 function App() {
   const [isDark, setIsDark] = useState(false)
   const [currentRole, setCurrentRole] = useState(0)
+  const [currentSeason, setCurrentSeason] = useState('winter')
   
   const roles = ['Developer', 'Cook', 'Designer', 'Creator']
   
+  // Auto-detect theme based on system preference and time
+  useEffect(() => {
+    const detectTheme = () => {
+      const hour = new Date().getHours()
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      const isNightTime = hour < 6 || hour > 18
+      
+      setIsDark(systemPrefersDark || isNightTime)
+    }
+    
+    detectTheme()
+    
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    mediaQuery.addEventListener('change', detectTheme)
+    
+    return () => mediaQuery.removeEventListener('change', detectTheme)
+  }, [])
+  
+  // Detect season based on current month
+  useEffect(() => {
+    const month = new Date().getMonth()
+    if (month >= 11 || month <= 1) {
+      setCurrentSeason('winter') // Dec, Jan, Feb
+    } else if (month >= 2 && month <= 4) {
+      setCurrentSeason('spring') // Mar, Apr, May
+    } else if (month >= 5 && month <= 7) {
+      setCurrentSeason('summer') // Jun, Jul, Aug
+    } else {
+      setCurrentSeason('autumn') // Sep, Oct, Nov
+    }
+  }, [])
+  
+  // Role rotation animation
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentRole((prev) => (prev + 1) % roles.length)
@@ -17,6 +60,7 @@ function App() {
     return () => clearInterval(interval)
   }, [])
   
+  // Apply theme to document
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark')
@@ -25,58 +69,192 @@ function App() {
     }
   }, [isDark])
 
-  return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-200 via-yellow-200 to-blue-300 dark:from-orange-900 dark:via-yellow-900 dark:to-blue-900"></div>
+  // Generate falling elements (snow/leaves)
+  const generateFallingElements = () => {
+    const elements = []
+    const count = 20
+    
+    for (let i = 0; i < count; i++) {
+      const size = Math.random() * 0.8 + 0.4 // 0.4rem to 1.2rem
+      const left = Math.random() * 100
+      const delay = Math.random() * 10
+      const duration = Math.random() * 3 + 7 // 7-10 seconds
       
-      {/* Wave Background */}
-      <div className="absolute bottom-0 left-0 right-0 h-96">
-        <svg viewBox="0 0 1200 320" className="absolute bottom-0 w-full h-full">
+      elements.push(
+        <div
+          key={i}
+          className="falling-element"
+          style={{
+            left: `${left}%`,
+            animationDelay: `${delay}s`,
+            animationDuration: `${duration}s`,
+            fontSize: `${size}rem`
+          }}
+        >
+          {currentSeason === 'winter' ? (
+            <img src={snowflakeSvg} alt="snowflake" className="w-4 h-4 opacity-80" />
+          ) : (
+            <span className="text-green-600 dark:text-green-400">🍃</span>
+          )}
+        </div>
+      )
+    }
+    
+    return elements
+  }
+
+  // Generate birds
+  const generateBirds = () => {
+    const birds = []
+    const count = 3
+    
+    for (let i = 0; i < count; i++) {
+      const top = Math.random() * 30 + 10 // 10% to 40% from top
+      const delay = Math.random() * 5
+      const duration = Math.random() * 5 + 15 // 15-20 seconds
+      const size = i === 0 ? 1.5 : 1 // First bird larger
+      
+      birds.push(
+        <div
+          key={i}
+          className="bird"
+          style={{
+            top: `${top}%`,
+            animationDelay: `${delay}s`,
+            animationDuration: `${duration}s`,
+            transform: `scale(${size})`
+          }}
+        >
+          <img src={birdGif} alt="flying bird" className="w-8 h-8" />
+        </div>
+      )
+    }
+    
+    return birds
+  }
+
+  // Generate clouds
+  const generateClouds = () => {
+    const clouds = []
+    const smallClouds = 4
+    const largeClouds = 3
+    
+    // Small clouds
+    for (let i = 0; i < smallClouds; i++) {
+      const top = Math.random() * 40 + 10
+      const left = Math.random() * 20 + 5
+      const delay = Math.random() * 3
+      
+      clouds.push(
+        <div
+          key={`small-${i}`}
+          className="cloud-small"
+          style={{
+            top: `${top}%`,
+            left: `${left}%`,
+            animationDelay: `${delay}s`
+          }}
+        >
+          <img 
+            src={isDark ? cloudAltDarkSvg : cloudAltSvg} 
+            alt="small cloud" 
+            className="w-12 h-8 opacity-60"
+          />
+        </div>
+      )
+    }
+    
+    // Large clouds
+    for (let i = 0; i < largeClouds; i++) {
+      const top = Math.random() * 50 + 20
+      const left = Math.random() * 25 + 5
+      const delay = Math.random() * 4
+      
+      clouds.push(
+        <div
+          key={`large-${i}`}
+          className="cloud-large"
+          style={{
+            top: `${top}%`,
+            left: `${left}%`,
+            animationDelay: `${delay}s`
+          }}
+        >
+          <img 
+            src={isDark ? cloudDarkSvg : cloudSvg} 
+            alt="large cloud" 
+            className="w-20 h-12 opacity-70"
+          />
+        </div>
+      )
+    }
+    
+    return clouds
+  }
+
+  return (
+    <div className="app-container">
+      {/* Background Gradient */}
+      <div className="background-gradient"></div>
+      
+      {/* Animation Layers */}
+      <div className="animation-layer birds-layer">
+        {generateBirds()}
+      </div>
+      
+      <div className="animation-layer clouds-layer">
+        {generateClouds()}
+      </div>
+      
+      <div className="animation-layer falling-layer">
+        {generateFallingElements()}
+      </div>
+      
+      {/* Sea Waves */}
+      <div className="sea-waves">
+        <svg viewBox="0 0 1200 320" className="wave wave-1">
           <path 
-            fill="rgba(59, 130, 246, 0.3)" 
+            fill="rgba(59, 130, 246, 0.2)" 
             d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,149.3C960,160,1056,160,1152,149.3L1200,139L1200,320L1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
           ></path>
+        </svg>
+        <svg viewBox="0 0 1200 320" className="wave wave-2">
           <path 
-            fill="rgba(59, 130, 246, 0.5)" 
+            fill="rgba(59, 130, 246, 0.3)" 
             d="M0,192L48,197.3C96,203,192,213,288,208C384,203,480,181,576,170.7C672,160,768,160,864,165.3C960,171,1056,181,1152,181.3L1200,181L1200,320L1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
           ></path>
+        </svg>
+        <svg viewBox="0 0 1200 320" className="wave wave-3">
+          <path 
+            fill="rgba(59, 130, 246, 0.4)" 
+            d="M0,256L48,240C96,224,192,192,288,181.3C384,171,480,181,576,197.3C672,213,768,235,864,224C960,213,1056,171,1152,154.7L1200,139L1200,320L1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          ></path>
+        </svg>
+        <svg viewBox="0 0 1200 320" className="wave wave-4">
+          <path 
+            fill="rgba(147, 197, 253, 0.6)" 
+            d="M0,288L48,277.3C96,267,192,245,288,245.3C384,245,480,267,576,272C672,277,768,267,864,250.7C960,235,1056,213,1152,208C1200,203,1200,213,1200,218.7L1200,224L1200,320L1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          ></path>
+        </svg>
+        <svg viewBox="0 0 1200 320" className="wave wave-5">
           <path 
             fill="rgba(147, 197, 253, 0.8)" 
-            d="M0,256L48,240C96,224,192,192,288,181.3C384,171,480,181,576,197.3C672,213,768,235,864,224C960,213,1056,171,1152,154.7L1200,139L1200,320L1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            d="M0,224L48,229.3C96,235,192,245,288,240C384,235,480,213,576,202.7C672,192,768,192,864,197.3C960,203,1056,213,1152,213.3L1200,213L1200,320L1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
           ></path>
         </svg>
       </div>
       
-      {/* Floating Clouds */}
-      <div className="absolute left-4 top-8 animate-float">
-        <div className="w-16 h-10 bg-orange-400 rounded-full opacity-80"></div>
-      </div>
-      <div className="absolute left-8 top-32 animate-float-delayed">
-        <div className="w-20 h-12 bg-orange-500 rounded-full opacity-70"></div>
-      </div>
-      <div className="absolute left-2 top-56 animate-float">
-        <div className="w-24 h-14 bg-orange-400 rounded-full opacity-60"></div>
-      </div>
-      <div className="absolute left-6 top-80 animate-float-delayed">
-        <div className="w-28 h-16 bg-orange-500 rounded-full opacity-80"></div>
-      </div>
-      <div className="absolute left-4 bottom-32 animate-float">
-        <div className="w-32 h-18 bg-orange-400 rounded-full opacity-70"></div>
-      </div>
-      
       {/* Navigation */}
-      <nav className="relative z-10 flex justify-between items-center p-6">
-        <div className="flex space-x-4">
-          {/* Social Icons - placeholder colored squares */}
-          <div className="w-8 h-8 bg-green-500 rounded"></div>
-          <div className="w-8 h-8 bg-blue-500 rounded"></div>
+      <nav className="navigation">
+        <div className="nav-left">
+          <div className="social-icon social-icon-1"></div>
+          <div className="social-icon social-icon-2"></div>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="nav-right">
           <Button 
             variant="outline" 
-            className="bg-purple-500 text-white border-purple-500 hover:bg-purple-600"
+            className="home-button"
           >
             Home
           </Button>
@@ -84,43 +262,43 @@ function App() {
             variant="outline"
             size="icon"
             onClick={() => setIsDark(!isDark)}
-            className="bg-yellow-400 text-black border-yellow-400 hover:bg-yellow-500"
+            className="theme-toggle"
           >
-            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {isDark ? <Sun className="icon-size" /> : <Moon className="icon-size" />}
           </Button>
         </div>
       </nav>
       
-      {/* Right Side Navigation Icons */}
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 flex flex-col space-y-3 z-10">
-        <div className="w-8 h-8 bg-cyan-500 rounded flex items-center justify-center text-white text-sm">3</div>
-        <div className="w-8 h-8 bg-pink-500 rounded flex items-center justify-center text-white text-sm">4</div>
-        <div className="w-8 h-8 bg-purple-500 rounded flex items-center justify-center text-white text-sm">7</div>
-        <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center text-white text-sm">8</div>
-        <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center text-white text-sm">9</div>
-        <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center text-white text-sm">10</div>
-        <div className="w-8 h-8 bg-blue-500 rounded flex items-center justify-center text-white text-sm">11</div>
+      {/* Side Navigation Icons */}
+      <div className="side-navigation">
+        <div className="side-icon side-icon-1">3</div>
+        <div className="side-icon side-icon-2">4</div>
+        <div className="side-icon side-icon-3">7</div>
+        <div className="side-icon side-icon-4">8</div>
+        <div className="side-icon side-icon-5">9</div>
+        <div className="side-icon side-icon-6">10</div>
+        <div className="side-icon side-icon-7">11</div>
       </div>
       
       {/* Main Content */}
-      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-6xl md:text-8xl font-bold text-gray-800 dark:text-white mb-8 leading-tight">
+      <main className="main-content">
+        <div className="content-wrapper">
+          <h1 className="main-heading">
             Hey there, I'm ME!
           </h1>
           
-          <div className="text-2xl md:text-3xl text-gray-700 dark:text-gray-200 mb-12">
+          <div className="role-text">
             <span>I'm a </span>
-            <span className="inline-block min-w-[200px] text-left font-semibold text-gray-900 dark:text-white transition-all duration-500">
+            <span className="role-animated">
               {roles[currentRole]}
             </span>
           </div>
           
-          <div className="bg-white/20 dark:bg-black/20 backdrop-blur-sm rounded-2xl p-8 max-w-2xl mx-auto">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+          <div className="intro-card">
+            <h2 className="intro-heading">
               Ayubowan!
             </h2>
-            <p className="text-lg text-gray-700 dark:text-gray-200 leading-relaxed">
+            <p className="intro-text">
               I'm a passionate Front-End Developer from Sri Lanka, with a knack for creating interactive and visually stunning user interfaces.
             </p>
           </div>
