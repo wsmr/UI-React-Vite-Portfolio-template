@@ -14,7 +14,7 @@
 - **Theme**: Light/dark mode toggle available
 
 ## Key Visual Features
-1. **Hero Section**: Large "Hey there, I'm Omal!" heading
+1. **Hero Section**: Large "Hey there, I'm ME!" heading
 2. **Floating Elements**: Orange cloud-like shapes on the left side
 3. **Gradient Background**: Smooth transition from warm to cool colors
 4. **Navigation**: Minimal navigation with theme toggle
