@@ -34,7 +34,7 @@ A pixel-perfect replica of the Portfolio.site personal website, built with moder
 ## 📦 Installation
 
 ### Prerequisites
-- Node.js v18+ 
+- Node.js v18+ (V22.14.0)
 - npm or pnpm
 
 ### Setup Instructions
